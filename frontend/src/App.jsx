@@ -6,7 +6,7 @@ function App() {
   const [preview, setPreview] = useState('')
   const [input, setInput] = useState('')
   const [suggestions, setSuggestions] = useState([])
-  const [sidebarOpen, setSidebarOpen] = useState(false) // По умолчанию закрыт на мобильных
+  const [sidebarOpen, setSidebarOpen] = useState(false) // По умолчанию скрыта
 
   useEffect(() => {
     fetch('http://10.93.24.189:8000/').then(r=>r.json()).then(d=>setSuggestions(d.suggestions||[]))
@@ -43,32 +43,31 @@ function App() {
   return (
     <>
       <style>{`
-        /* === БАЗОВЫЕ СТИЛИ === */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: system-ui, -apple-system, sans-serif; background: #f8faf8; color: #1a1a2e; }
         
-        /* === САЙДБАР === */
+        /* === САЙДБАР (СКРЫТ ПО УМОЛЧАНИЮ) === */
         .sws-sidebar {
-          position: fixed; left: 0; top: 0; height: 100vh;
+          position: fixed; top: 0; left: 0; height: 100vh;
           width: 320px; background: white; border-right: 1px solid #e2e8f0;
           padding: 24px; overflow-y: auto; z-index: 1000;
           transform: translateX(-100%); transition: transform 0.3s ease;
         }
         .sws-sidebar.open { transform: translateX(0); }
         
-        /* === OVERLAY ДЛЯ МОБИЛЬНЫХ === */
+        /* === OVERLAY (ЗАТЕМНЕНИЕ) === */
         .sws-overlay {
           display: none; position: fixed; inset: 0;
           background: rgba(0,0,0,0.4); z-index: 999;
         }
         .sws-overlay.show { display: block; }
         
-        /* === КНОПКИ-БУРГЕРЫ === */
+        /* === КНОПКА МЕНЮ (ВИДНА ВСЕГДА) === */
         .sws-toggle {
           position: fixed; top: 16px; left: 16px; z-index: 1001;
-          background: #16a34a; border: none; border-radius: 12px;
-          padding: 12px; cursor: pointer; font-size: 22px;
-          color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          background: #16a34a; border: none; border-radius: 10px;
+          padding: 10px 14px; cursor: pointer; font-size: 20px;
+          color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.15);
         }
         .sws-close {
           position: absolute; top: 12px; right: 12px;
@@ -78,31 +77,20 @@ function App() {
         
         /* === ОСНОВНОЙ КОНТЕНТ === */
         .sws-main {
-          padding: 70px 16px 30px; /* Отступ сверху для кнопки */
-          max-width: 600px; margin: 0 auto;
+          padding: 70px 16px 30px; max-width: 600px; margin: 0 auto;
         }
         
-        /* === КАРТОЧКИ === */
+        /* === ЭЛЕМЕНТЫ ИНТЕРФЕЙСА === */
         .sws-card {
-          background: white; border-radius: 16px;
-          padding: 20px; margin-bottom: 16px;
-          box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+          background: white; border-radius: 16px; padding: 20px;
+          margin-bottom: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         }
-        
-        /* === КНОПКИ И ИНПУТЫ === */
         .sws-btn {
           padding: 14px 20px; border: none; border-radius: 12px;
           font-size: 16px; font-weight: 600; cursor: pointer;
-          transition: all 0.15s;
         }
-        .sws-btn-primary { background: #16a34a; color: white; }
+        .sws-btn-primary { background: #16a34a; color: white; width: 100%; }
         .sws-btn-primary:disabled { background: #cbd5e1; cursor: not-allowed; }
-        .sws-btn-secondary {
-          background: #f1f5f9; color: #475569;
-          border: 1px solid #e2e8f0; padding: 8px 14px;
-          font-size: 14px; border-radius: 20px;
-        }
-        .sws-btn-secondary:hover { background: #16a34a; color: white; border-color: #16a34a; }
         
         .sws-input {
           width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0;
@@ -110,29 +98,22 @@ function App() {
         }
         .sws-input:focus { border-color: #16a34a; }
         
-        /* === ПРЕВЬЮ ФОТО === */
         .sws-preview {
-          max-width: 120px; max-height: 120px;
-          border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-          object-fit: contain; display: block; margin: 12px auto;
+          max-width: 120px; max-height: 120px; border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1); object-fit: contain;
+          display: block; margin: 12px auto;
         }
         
-        /* === РЕЗУЛЬТАТ === */
         .sws-result {
           text-align: center; padding: 24px; border-radius: 16px;
-          border: 2px solid;
+          border: 2px solid; margin-top: 20px;
         }
         .sws-result.success { background: #f0fdf4; border-color: #86efac; }
         .sws-result.error { background: #fffbeb; border-color: #fde68a; }
         .sws-result-emoji { font-size: 48px; margin-bottom: 8px; }
-        .sws-result-text { color: #166534; font-weight: 700; font-size: 16px; margin: 8px 0; }
-        .sws-result-co2 {
-          background: #dcfce7; border-radius: 10px;
-          padding: 8px 14px; display: inline-block;
-          font-weight: 600; color: #15803d; margin-top: 12px;
-        }
+        .sws-result-text { color: #166534; font-weight: 700; font-size: 18px; margin: 8px 0; }
         
-        /* === СПИСОК ПРАВИЛ === */
+        /* === ПРАВИЛА СОРТИРОВКИ (КАРТОЧКИ) === */
         .rule-card {
           padding: 12px; border-radius: 12px; margin-bottom: 12px;
           border: 1px solid; font-size: 14px; line-height: 1.5;
@@ -144,45 +125,19 @@ function App() {
         .rule-card ul { padding-left: 18px; margin: 6px 0; }
         .rule-card strong { display: block; margin-bottom: 4px; }
         
-        /* === АДАПТИВ ПОД ТЕЛЕФОНЫ (< 600px) === */
-        @media (max-width: 600px) {
-          .sws-sidebar { width: 85%; max-width: 320px; }
-          .sws-main { padding: 65px 12px 24px; }
-          .sws-card { padding: 16px; border-radius: 14px; }
-          .sws-btn { padding: 12px 16px; font-size: 15px; border-radius: 10px; }
-          .sws-input { padding: 12px 14px; font-size: 15px; }
-          .sws-preview { max-width: 100px; max-height: 100px; }
-          .sws-result-emoji { font-size: 40px; }
-          .sws-result-text { font-size: 15px; }
-          h1 { font-size: 22px !important; }
-          .suggestions-wrap { gap: 6px !important; }
-          .sws-btn-secondary { padding: 6px 12px; font-size: 13px; }
+        /* Кнопки быстрого поиска */
+        .sws-btn-secondary {
+          background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0;
+          padding: 8px 14px; font-size: 14px; border-radius: 20px; cursor: pointer;
         }
-        
-        /* === ДЛЯ ПЛАНШЕТОВ (600-900px) === */
-        @media (min-width: 601px) and (max-width: 900px) {
-          .sws-sidebar { width: 280px; }
-          .sws-main { padding: 70px 20px 30px; }
-        }
-        
-        /* === ДЛЯ ДЕСКТОПА (> 900px) — сайдбар всегда виден === */
-        @media (min-width: 901px) {
-          .sws-sidebar {
-            position: relative; transform: translateX(0) !important;
-            height: auto; border-right: 1px solid #e2e8f0;
-          }
-          .sws-overlay { display: none !important; }
-          .sws-toggle { display: none !important; }
-          .sws-close { display: none !important; }
-          .sws-main { padding: 30px 20px; }
-        }
+        .sws-btn-secondary:hover { background: #16a34a; color: white; border-color: #16a34a; }
       `}</style>
       
-      <div style={{display:'flex', minHeight:'100vh'}}>
+      <div>
         {/* Overlay для мобильных */}
         <div className={`sws-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)}/>
 
-        {/* Кнопка открытия сайдбара (только мобильные) */}
+        {/* Кнопка открытия меню */}
         <button className="sws-toggle" onClick={() => setSidebarOpen(true)} title="Sorting Rules">
           ☰
         </button>
@@ -259,7 +214,7 @@ function App() {
           {/* Поиск */}
           <div className="sws-card">
             <p style={{margin:'0 0 10px', color:'#64748b', fontSize:13, fontWeight:500}}>Or find instantly:</p>
-            <div className="suggestions-wrap" style={{display:'flex', gap:8, flexWrap:'wrap', justifyContent:'center', marginBottom:14}}>
+            <div style={{display:'flex', gap:8, flexWrap:'wrap', justifyContent:'center', marginBottom:14}}>
               {suggestions.map(s => (
                 <button key={s} onClick={()=>handleSearch(s)} className="sws-btn-secondary">{s}</button>
               ))}
@@ -268,7 +223,7 @@ function App() {
               <input value={input} onChange={e=>setInput(e.target.value)} placeholder="pepsi, iphone..." 
                 className="sws-input" onKeyPress={e=>e.key==='Enter'&&handleSearch()}/>
               <button onClick={()=>handleSearch()} disabled={!input.trim()||loading} 
-                className="sws-btn sws-btn-primary" style={{padding:'14px 18px'}}>🔍</button>
+                className="sws-btn sws-btn-primary" style={{padding:'14px 18px', width:'auto'}}>🔍</button>
             </div>
           </div>
 
@@ -282,7 +237,9 @@ function App() {
                     ✅ {result.text}
                   </p>
                   <p className="sws-result-text">{result.instruction}</p>
-                  <div className="sws-result-co2">🌍 CO₂: {result.co2}</div>
+                  <div style={{background:'#dcfce7', borderRadius:10, padding:'8px 14px', display:'inline-block', fontWeight:600, color:'#15803d', marginTop:10}}>
+                    🌍 CO₂: {result.co2}
+                  </div>
                 </>
               ) : (
                 <p style={{color:'#b45309', fontSize:15, margin:0}}>{result.message}</p>
