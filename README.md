@@ -2,8 +2,6 @@
 
 **AI-powered waste sorting assistant with CO₂ tracking**
 
-## Demo
-![Demo](screenshots/main.png)
 
 ## Context
 - **End users**: Environmentally conscious individuals who sort waste
@@ -25,7 +23,7 @@
 - Location-based recycling points
 
 ## Usage
-1. Open http://your-vm-ip:3000
+1. Open http://10.93.24.189:3000
 2. Upload photo or search manually
 3. Get waste category and disposal instructions
 
